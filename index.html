@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://pixijs.download/release/pixi.js"></script>
+</head>
+
+<body>
+</body>
+<script>
+    const app = new PIXI.Application();
+    document.body.appendChild(app.view);
+
+    PIXI.Assets.load('/assets/eggHead.png').then((texture) => {
+        const plane = new PIXI.SimplePlane(texture, 10, 10);
+
+        plane.x = 100;
+        plane.y = 100;
+
+        app.stage.addChild(plane);
+
+        // Get the buffer for vertice positions.
+        const buffer = plane.geometry.getBuffer('aVertexPosition');
+
+        // Listen for animate update
+        let timer = 0;
+        app.ticker.add(() => {
+            // Randomize the vertice positions a bit to create movement.
+            for (let i = 0; i < buffer.data.length; i++) {
+                buffer.data[i] += Math.sin((timer / 10) + i) * 0.5;
+            }
+            buffer.update();
+            timer++;
+        });
+    });
+</script>
+
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://pixijs.download/release/pixi.js"></script>
+</head>
+
+<body>
+</body>
+<script>
+    const app = new PIXI.Application({
+        antialias: true
+    });
+    document.body.appendChild(app.view);
+
+    const yellowStar = PIXI.Texture.from('/assets/yellowstar.png');
+
+    const btn = new PIXI.Sprite(yellowStar);
+    btn.position.set(600, 200);
+    btn.buttonMode = true;
+    btn.interactive = true;
+
+    btn.hitArea = new PIXI.Polygon([
+        80, 0,
+        100, 50,
+        160, 55,
+        115, 95,
+        130, 150,
+        80, 120,
+        30, 150,
+        45, 95,
+        0, 55,
+        60, 50,
+    ]);
+
+    const mask = new PIXI.Graphics().beginFill(0xFFFFFF).drawRect(btn.x, btn.y, 75, 200).endFill();
+    btn.mask = mask;
+    
+    btn.on('pointerdown', (event) => onClick(btn));
+    btn.on('pointerover', (event) => onPointerOver(btn));
+    btn.on('pointerout', (event) => onPointerOut(btn));
+
+    const style = new PIXI.TextStyle({
+        fill: '#ffffff'
+    });
+    const text4 = new PIXI.Text('Mask + Hit Area', style);
+    text4.x = btn.x - 10;
+    text4.y = btn.y + 170;
+
+    app.stage.addChild(btn, mask, text4);
+
+    function onClick(object) {
+        object.tint = 0x333333;
+    }
+
+    function onPointerOver(object) {
+        object.tint = 0x666666;
+    }
+
+    function onPointerOut(object) {
+        object.tint = 0xFFFFFF;
+    }
+</script>
+
+</html>

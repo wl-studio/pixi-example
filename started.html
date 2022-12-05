@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://pixijs.download/release/pixi.js"></script>
+</head>
+
+<body>
+</body>
+<script>
+    let app = new PIXI.Application({
+        width: 1240,
+        height: 760
+    });
+    document.body.appendChild(app.view);
+
+    let sprite = PIXI.Sprite.from('/assets/sample.png');
+    app.stage.addChild(sprite);
+
+    let elapsed = 0.0;
+    app.ticker.add((delta) => {
+        elapsed += delta;
+
+        sprite.x = 100 + Math.cos(elapsed / 50) * 100;
+    });
+</script>
+
+</html>

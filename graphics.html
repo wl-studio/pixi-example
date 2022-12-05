@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://pixijs.download/release/pixi.js"></script>
+</head>
+
+<body>
+</body>
+<script>
+    const app = new PIXI.Application({ antialias: true });
+    document.body.appendChild(app.view);
+
+    app.stage.interactive = true;
+
+    const screenWidth = app.screen.width / 2;
+    const screenHeight = app.screen.height / 2;
+
+    const bg = PIXI.Sprite.from('/assets/bg_rotate.jpeg');
+    bg.anchor.set(0.5);
+    bg.x = screenWidth;
+    bg.y = screenHeight;
+
+    app.stage.addChild(bg);
+
+    const container = new PIXI.Container();
+container.x = app.screen.width / 2;
+container.y = app.screen.height / 2;
+
+    const bgFront = PIXI.Sprite.from('/assets/bg_scene_rotate.jpeg');
+    bgFront.anchor.set(0.5);
+
+    const light2 = PIXI.Sprite.from('/assets/light_rotate_2.png');
+    light2.anchor.set(0.5);
+
+    const light1 = PIXI.Sprite.from('/assets/light_rotate_1.png');
+    light1.anchor.set(0.5);
+
+    const panda = PIXI.Sprite.from('/assets/panda.png');
+    panda.anchor.set(0.5);
+
+    container.addChild(bgFront, light2, light1, panda);
+    app.stage.addChild(container);
+
+    const thing = new PIXI.Graphics();
+    app.stage.addChild(thing);
+    thing.x = app.screen.width / 2;
+    thing.y = app.screen.height / 2;
+    thing.lineStyle(0);
+
+    // container.mask = thing;
+
+    // 点击切换显示遮罩
+    app.stage.on('pointertap', () => {
+        container.mask = container.mask ? null : thing;
+    });
+
+    const help = new PIXI.Text('Click or tap to turn masking on / off.', {
+        fontFamily: 'Arial',
+        fontSize: 12,
+        fontWeight: 'bold',
+        fill: 'white'
+    });
+    help.x = 10;
+    help.y = app.screen.height - 26;
+    app.stage.addChild(help);
+
+    let count = 0;
+
+    app.ticker.add(() => {
+        bg.rotation += 0.01;
+        bgFront.rotation -= 0.01;
+
+        light1.rotation += 0.01;
+        light2.rotation += 0.01;
+
+        panda.scale.x = 1 + Math.sin(count) * 0.04;
+        panda.scale.y = 1 + Math.cos(count) * 0.04;
+
+        panda.position.x =  Math.cos(count) * 5;
+        panda.position.y =  Math.sin(count) * 5;
+
+        count += 0.1;
+
+        thing.clear();
+
+        thing.beginFill(0x8bc5ff, 0.4);
+        thing.moveTo(-120 + Math.sin(count) * 20, -100 + Math.cos(count) * 20);
+        thing.lineTo(140 + Math.cos(count) * 20, -100 + Math.sin(count) * 20);
+        thing.lineTo(120 + Math.sin(count) * 20, 100 + Math.cos(count) * 20);
+        thing.lineTo(-120 + Math.cos(count) * 20, 100 + Math.sin(count) * 20);
+        thing.rotation = count * 0.1;
+    });
+    
+</script>
+
+</html>

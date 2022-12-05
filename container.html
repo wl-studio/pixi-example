@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://pixijs.download/release/pixi.js"></script>
+</head>
+
+<body>
+</body>
+<script>
+    let app = new PIXI.Application({
+        width: 1240,
+        height: 760
+    });
+    document.body.appendChild(app.view);
+
+    const frame = new PIXI.Graphics();
+    frame.beginFill(0xffffff);
+    frame.drawRect(0, 0, 200, 200);
+    frame.endFill();
+    // frame.beginFill(0x666666);
+    // frame.lineStyle({
+    //     color: 0xffffff,
+    //     width: 4,
+    //     alignment: 0
+    // });
+    // frame.drawRect(100, 100, 208, 208);
+    // frame.position.set(320 - 104, 180 - 104);
+    app.stage.addChild(frame);
+
+    const mask = new PIXI.Graphics();
+    mask.beginFill(0x666666);
+    mask.drawRect(0, 0, 200, 200);
+    mask.endFill();
+
+    const maskContainer = new PIXI.Container();
+    maskContainer.mask = mask;
+    maskContainer.addChild(mask);
+    // maskContainer.position.set(4, 4);
+    frame.addChild(maskContainer);
+
+    const text = new PIXI.Text(
+        'This text will scroll up and be masked, so you can see how masking works.  Lorem ipsum and all that.\n\n' +
+        'You can put anything in the container and it will be masked!', {
+            fontSize: 24,
+            fill: 0x1010ff,
+            wordWrap: true,
+            wordWrapWidth: 180
+        }
+    );
+    text.x = 10;
+    maskContainer.addChild(text);
+
+    let elapsed = 0;
+    app.ticker.add((delta) => {
+        elapsed += delta;
+        text.y = 10 + -100 + Math.cos(elapsed / 50) * 100;
+    });
+</script>
+
+</html>

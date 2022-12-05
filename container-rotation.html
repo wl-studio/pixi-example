@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://pixijs.download/release/pixi.js"></script>
+</head>
+
+<body>
+</body>
+<script>
+    let app = new PIXI.Application({
+        width: 1240,
+        height: 760
+    });
+    document.body.appendChild(app.view);
+
+    const container = new PIXI.Container();
+    app.stage.addChild(container);
+
+    const texture = PIXI.Texture.from('sample.png');
+
+    for (let i = 0; i < 25; i++) {
+        const bunny = new PIXI.Sprite(texture);
+        bunny.anchor.set(0.5);
+        bunny.x = ( i % 5 ) * 40;
+        bunny.y = Math.floor(i / 5) * 40;
+        container.addChild(bunny);
+    }
+
+    container.x = app.screen.width / 2;
+    container.y = app.screen.height / 2;
+
+    container.pivot.x = container.width / 2;
+    container.pivot.y = container.height / 2;
+
+    app.ticker.add((delta) => {
+        container.rotation -= 0.01 * delta;
+    });
+</script>
+
+</html>
