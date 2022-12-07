@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
+<!-- saved from url=(0022)http://localhost:8080/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <script src="https://pixijs.download/release/pixi.js"></script>
+    <script src="./Document_files/pixi.js"></script>
     <style>
         * {
             padding: 0;
@@ -17,7 +16,7 @@
 
 <body>
 
-</body>
+
 <script>
     const initStage = () => {
         const app = new PIXI.Application({
@@ -61,10 +60,6 @@
             this.max = max;
             this.min = 1;
             this.init();
-        }
-
-        hasSprite() {
-            return this.material.length > 0;
         }
 
         borrowSprite() {
@@ -126,8 +121,6 @@
             ];
             this.materialTypes = ['edge', 'window', 'decoration', 'step'];
             this.allStep = 5;
-            this.reBackWidth = 0;
-            this.speed = 2;
         }
 
         runFarMove() {
@@ -151,27 +144,21 @@
         }
 
         getRandomType() {
-            const index = getRandom(3, 0);
-            const type = this.materialTypes[index];
-            if (this[type].hasSprite()) {
-                return type;
-            }
-            return this.getRandomType();
+            return this.materialTypes[getRandom(3, 0)];
         }
 
-        async runWall(delta) {
-            const centerX = parseInt(Math.abs(this.wallContainer.x) / 64)
-            if (centerX >= this.allStep) {
-                this.allStep += 5;
+        runWall() {
+            const centerX = this.slices[this.allStep].getBounds().x;
+            if (centerX <= 0) {
                 for (let i = 0; i < 5; i++) {
                     this.reBackMaterial();
-                    this.reBackWidth += 64;
-                    const type = await this.getRandomType();
-                    this.borrowMaterial(type);
+                    this.borrowMaterial(this.getRandomType());
                 }
-            } else {
-                this.wallContainer.x -= this.speed;
+                this.wallContainer.x = 0;
+            }else {
+                this.wallContainer.x -= 1;
             }
+            // console.log(this.wallContainer.x, this.allStep, centerX);
         }
 
         async init() {
@@ -179,7 +166,7 @@
             this.loadSprite('farSprite', initFarSprite);
             this.loadSprite('midSprite', initMidSprite);
             this.loadWall();
-            this.runTicker();
+            // this.runTicker();
         }
 
         loadWall() {
@@ -208,7 +195,7 @@
             for (let i = 0; i < num; i++) {
                 const sprite = this[target].borrowSprite();
                 const len = this.slices.length;
-                sprite.x = this.reBackWidth + len * 64;
+                sprite.x = len * 64;
                 this.slices.push(sprite);
                 this.wallContainer.addChild(sprite);
             }
@@ -231,6 +218,7 @@
     }
     const re = new render();
     re.init();
-</script>
+</script><canvas width="829" height="739" style="touch-action: none; cursor: inherit;"></canvas>
 
-</html>
+
+</body></html>
