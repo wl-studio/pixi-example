@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://pixijs.download/release/pixi.js"></script>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+</body>
+<script>
+    const initStage = () => {
+        const app = new PIXI.Application({
+            width: window.innerWidth,
+            height: window.innerHeight,
+            background: 0x000000,
+            resizeTo: window
+        });
+        document.body.appendChild(app.view);
+        return app;
+    };
+
+    async function initFarSprite() {
+        const sprite = await this.loadTilingSprite('/assets/bg-far.png', {
+            width: window.innerWidth,
+            height: 256
+        });
+        sprite.tilePosition.x = 0;
+        sprite.tilePosition.y = 0;
+        return sprite;
+    };
+
+    async function initMidSprite() {
+        const sprite = await this.loadTilingSprite('/assets/bg-mid.png', {
+            width: window.innerWidth,
+            height: 256
+        });
+        sprite.y = 156;
+        sprite.tilePosition.x = 0;
+        sprite.tilePosition.y = 0;
+        return sprite;
+    };
+
+    const getRandom = (max, min = 1) => Math.floor(Math.random() * max) + min;
+
+    class wallSpritePoll {
+        constructor(type, max, quantity) {
+            this.material = [];
+            this.type = type;
+            this.quantity = quantity;
+            this.max = max;
+            this.min = 1;
+            this.init();
+        }
+
+        hasSprite() {
+            return this.material.length > 0;
+        }
+
+        borrowSprite() {
+            return this.material.shift();
+        }
+
+        reBackSprite(sprite) {
+            this.material.push(sprite);
+        }
+
+        addMaterial(target) {
+            this.material.push(PIXI.Sprite.from(PIXI.Texture.from(target)));
+        }
+
+        createMaterial(len) {
+            for (let i = 0; i < len; i++) {
+                const num = getRandom(this.max, this.min);
+                this.addMaterial(`${this.type}_0${num}`);
+            }
+        }
+
+        init() {
+            this.createMaterial(this.quantity);
+        }
+    }
+
+    class render {
+        constructor() {
+            this.renderer = initStage();
+            this.stage = this.renderer.stage
+            this.farSprite = null;
+            this.midSprite = null;
+
+            this.wallContainer = null;
+            this.window = null;
+            this.step = null;
+            this.edge = null;
+            this.decoration = null;
+            this.slices = [];
+            this.contentMaterial = [
+                'edge',
+                'window',
+                'decoration',
+                'window',
+                'decoration',
+                'window',
+                'decoration',
+                'step',
+                'window',
+                'decoration',
+                'window',
+                'decoration',
+                'step',
+                'edge',
+                'decoration',
+                'window',
+                'decoration',
+                'window',
+            ];
+            this.materialTypes = ['edge', 'window', 'decoration', 'step'];
+            this.allStep = 5;
+            this.reBackWidth = 0;
+            this.speed = 2;
+        }
+
+        runFarMove() {
+            this.farSprite.tilePosition.x += 0.1;
+        }
+
+        runMidMove() {
+            this.midSprite.tilePosition.x -= 0.34;
+        }
+
+        runTicker() {
+            this.renderer.ticker.add(delta => {
+                if (this.farSprite) {
+                    this.runFarMove(delta);
+                }
+                if (this.midSprite) {
+                    this.runMidMove(delta);
+                }
+                this.runWall(delta);
+            });
+        }
+
+        getRandomType() {
+            const index = getRandom(3, 0);
+            const type = this.materialTypes[index];
+            if (this[type].hasSprite()) {
+                return type;
+            }
+            return this.getRandomType();
+        }
+
+        async runWall(delta) {
+            const centerX = parseInt(Math.abs(this.wallContainer.x) / 64)
+            if (centerX >= this.allStep) {
+                this.allStep += 5;
+                for (let i = 0; i < 5; i++) {
+                    this.reBackMaterial();
+                    this.reBackWidth += 64;
+                    const type = await this.getRandomType();
+                    this.borrowMaterial(type);
+                }
+            } else {
+                this.wallContainer.x -= this.speed;
+            }
+        }
+
+        async init() {
+            await PIXI.Assets.load('/assets/wall.json');
+            this.loadSprite('farSprite', initFarSprite);
+            this.loadSprite('midSprite', initMidSprite);
+            this.loadWall();
+            this.runTicker();
+        }
+
+        loadWall() {
+            this.wallContainer = new PIXI.Container();
+            this.wallContainer.x = 0;
+            this.wallContainer.y = window.innerHeight - 256;
+            this.addStage(this.wallContainer);
+            this.window = new wallSpritePoll('window', 2, 12);
+            this.step = new wallSpritePoll('step', 1, 12);
+            this.edge = new wallSpritePoll('edge', 2, 6);
+            this.decoration = new wallSpritePoll('decoration', 3, 12);
+            for (let i = 0; i < this.contentMaterial.length; i++) {
+                const item = this.contentMaterial[i];
+                this.borrowMaterial(item);
+            }
+        }
+
+        reBackMaterial() {
+            const target = this.contentMaterial[0];
+            const sprite = this.slices.shift();
+            this.wallContainer.removeChild(sprite);
+            this[target].reBackSprite(sprite);
+        }
+
+        borrowMaterial(target, num = 1) {
+            for (let i = 0; i < num; i++) {
+                const sprite = this[target].borrowSprite();
+                const len = this.slices.length;
+                sprite.x = this.reBackWidth + len * 64;
+                this.slices.push(sprite);
+                this.wallContainer.addChild(sprite);
+            }
+        }
+
+        async loadTilingSprite(path, opt) {
+            const bgFarFile = await PIXI.Assets.load(path);
+            const sprite = PIXI.TilingSprite.from(bgFarFile, opt);
+            return sprite;
+        }
+
+        async loadSprite(key, fn, sprite) {
+            this[key] = await fn.apply(this);
+            this.addStage(this[key]);
+        }
+
+        addStage(target) {
+            this.stage.addChild(target);
+        }
+    }
+    const re = new render();
+    re.init();
+</script>
+
+</html>
